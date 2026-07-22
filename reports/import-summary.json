@@ -1,0 +1,15 @@
+{
+  "duplicate_entries_removed": 0,
+  "import_timestamp": "2026-07-22T21:00:26.513861+00:00",
+  "lines_inspected": 7678,
+  "malformed_entries_rejected": 0,
+  "rejection_counts_by_reason": {
+    "embedded_credentials": 6,
+    "private_access_indicator": 3,
+    "private_ipv4": 1,
+    "sensitive_query_parameter": 3785
+  },
+  "source_url": "https://raw.githubusercontent.com/Duartegame/TV-TDT/refs/heads/main/m3.txt",
+  "unsafe_entries_rejected": 3795,
+  "valid_entries_accepted": 19
+}
