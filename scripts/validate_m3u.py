@@ -8,6 +8,10 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from scripts.generate_m3u import CHANNELS_CSV, CSV_HEADERS, OUTPUT_M3U, generate_m3u, load_rows
 
 SENSITIVE_PATTERNS = [

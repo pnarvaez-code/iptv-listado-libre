@@ -130,11 +130,8 @@ def test_report_sanitisation_and_no_secret_leak(tmp_path: Path) -> None:
     assert "user:pass" not in serialized
     assert payload["unsafe_entries_rejected"] == 2
 
-    domains = domains_path.read_text(encoding="utf-8")
-    assert "private.example.com" in domains
-    assert "bad.example.com" in domains
-    assert "?" not in domains
-    assert "/" not in domains
+    domains = set(domains_path.read_text(encoding="utf-8").splitlines())
+    assert domains == {"private.example.com", "bad.example.com"}
 
 
 def test_run_import_writes_channels_csv_with_expected_schema(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
