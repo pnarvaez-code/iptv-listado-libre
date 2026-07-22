@@ -1,0 +1,63 @@
+name: Validate IPTV data
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest requests
+
+      - name: Manual import from external source
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: python scripts/import_source.py
+
+      - name: Generate M3U from CSV
+        run: python scripts/generate_m3u.py
+
+      - name: Validate CSV and M3U
+        run: python scripts/validate_m3u.py
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Scan generated files for credentials
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import urllib.parse
+          
+          patterns = [
+              re.compile(r'(?i)(?:^|[?&])(username|password|user|pass|token|api_key|apikey|auth|authorization|access_token|secret|signature|session|cookie)='),
+              re.compile(r'://[^\s/@:]+:[^\s/@]+@'),
+          ]
+          files = [Path('channels.csv'), Path('canales.m3u')]
+          for file in files:
+              data = file.read_text(encoding='utf-8')
+              decoded = urllib.parse.unquote(data)
+              for pattern in patterns:
+                  if pattern.search(decoded):
+                      raise SystemExit(f'Sensitive credential pattern detected in {file}')
+          print('Credential scan passed')
+          PY
+
+      - name: Ensure deterministic canales.m3u
+        run: |
+          cp canales.m3u /tmp/canales.snapshot
+          python scripts/generate_m3u.py
+          diff -u /tmp/canales.snapshot canales.m3u
